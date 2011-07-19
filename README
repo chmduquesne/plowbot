@@ -1,6 +1,10 @@
 Plowbot is a minimalist jabber bot for plowshare. Once launched, it just
 waits for links and downloads them using plowshare.
 
+== Dependencies ==
+
+python-jabberbot, pyxdg
+
 == Configuration ==
 
 The first time you launch it, it will ask for credentials to be configured
