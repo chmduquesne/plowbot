@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+# !/usr/bin/env python2
 #
 # PlowBot: A bot that downloads the links you paste using plowshare.
 #
