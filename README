@@ -1,5 +1,5 @@
 Plowbot is a minimalist jabber bot for plowshare. Once launched, it just
-waits for links to pass to plowshare and downloads them.
+waits for links and downloads them using plowshare.
 
 == Configuration ==
 
