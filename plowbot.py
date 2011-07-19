@@ -1,98 +1,99 @@
 # !/usr/bin/env python
 #
-# PlowBot: A bot that dowloads the links you paste using plowshare.
+# PlowBot: A bot that downloads the links you paste using plowshare.
+#
 # Copyright (c) 2011 Christophe-Marie Duquesne <chm.duquesne@gmail.com>
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
+# This program is licensed under the terms WTF Public License, in case
+# anybody cares.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received (or not) a copy of the WTFPL along with this
+# program. If not, see <http://sam.zoy.org/wtfpl/COPYING>.
 
 from __future__ import with_statement
 from jabberbot import JabberBot
-import sys
-import getopt
+from xdg.BaseDirectory import save_config_path
+import os.path
 import threading
 import time
 import subprocess
+import json
+import readline
 
 class PlowBot(JabberBot):
 
-    def __init__(self, jid, password, max_parallel_downloads=3,
-            res = None):
-        super(PlowBot, self).__init__(jid, password, res)
+    def __init__(self, user, password, max_parallel_downloads=3,
+            download_directory = "~/downloads", res = None):
+        super(PlowBot, self).__init__(user, password, res)
         self.download_queue = []
+        self.queue_sema = threading.Semaphore(0) # == len(download_queue)
         self.parallel_downloads_sema = threading.BoundedSemaphore(
                 max_parallel_downloads)
-        self.queue_sema = threading.Semaphore(0)
+        self.download_directory = os.path.expanduser(download_directory)
+        assert os.path.exists(self.download_directory), "Download directory does not exist"
 
-    # We do not want a command for downloading urls: we want every message
-    # to be treated as a set of urls we'll try to download. Thus, we use a
-    # "trick": we use the unknown_command method for that.
-    def unknown_command(self, mess, cmd, arg):
+    # We do not want a command for downloading urls: we prefer every
+    # message to be treated as a set of urls we'll try to download. Thus,
+    # we use a "trick": we use the unknown_command method for that.
+    def unknown_command(self, msg, cmd, arg):
         """Splits the input and adds it to the download queue"""
         for url in (' '.join([cmd, arg])).split():
-            self.download_queue.append((mess, url))
-            self.queue_sema.release() # release as many times as
+            self.download_queue.append((msg, url))
+            self.queue_sema.release()
         return "Launching download(s)."
 
     def download_loop(self):
         """Loops on downloading files of the queue."""
         while True:
             self.queue_sema.acquire() # wait until the queue is not empty
-            mess, url = self. download_queue.pop()
-            t = threading.Thread(target = self.do_download, args = (mess,
+            msg, url = self. download_queue.pop()
+            t = threading.Thread(target = self.do_download, args = (msg,
                 url))
             t.daemon = True
             t.start()
 
-    def do_download(self, mess, url):
+    def do_download(self, msg, url):
         """Downloads the given url and replies when finished"""
         with self.parallel_downloads_sema:
-            p = subprocess.Popen(["plowdown", url],
-                    stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            p = subprocess.Popen(["plowdown", "-o",
+                self.download_directory, url],
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE)
             p.wait()
             stdout, stderr = p.communicate()
             if p.returncode != 0 or not stdout:
-                reply = "Are you sure you pasted a valid link? "
-                reply += "Error: " + stderr.strip()
+                reply = "Error: " + stderr
+                reply += "Are you sure you pasted a valid link?"
             else:
                 reply = stdout.strip() + " successfully downloaded."
-            self.send_simple_reply(mess, reply)
+            self.send_simple_reply(msg, reply)
+
+def make_new_config(config_path):
+    import getpass
+    user = raw_input("Please enter the Jabber ID for your bot: ")
+    while True:
+        attempt1 = getpass.getpass("Please enter the Jabber password: ")
+        attempt2 = getpass.getpass("Please confirm the Jabber password: ")
+        if (attempt1 == attempt2):
+            password = attempt1
+            break
+    dl_dir = raw_input("Please enter your download directory: ")
+    with open(config_path, "wb") as f:
+        json.dump({
+            "user": user,
+            "password": password,
+            "max_parallel_downloads": 3,
+            "download_directory": dl_dir
+            }, indent = 4, fp = f)
+    print("config saved in %s" % config_path)
 
 if __name__ == "__main__":
-    try:
-        opts, args = getopt.gnu_getopt(sys.argv[1:], "hu:p:", ["help",
-            "user=", "password="])
-    except getopt.GetoptError, err:
-        print str(err)
-        print __doc__
-        sys.exit(2)
-    output = None
-    verbose = False
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            print(__doc__)
-        elif opt in ("-u", "--user"):
-            user = arg
-        elif opt in ("-p", "--password"):
-            password = arg
-        else:
-            assert False, "unhandled option"
-    if not (user and password):
-        print("missing identifiers")
-        print(__doc__)
-
-    bot = PlowBot(user, password)
-    t = threading.Thread(target = bot.download_loop)
-    t.daemon = True
-    bot.serve_forever(connect_callback = lambda: t.start())
-
+    config_path = os.path.join(save_config_path("plowbot"), "plowbotrc")
+    if not os.path.exists(config_path):
+        make_new_config(config_path)
+    with open(config_path) as f:
+        config = json.load(f)
+        bot = PlowBot(**config)
+        t = threading.Thread(target = bot.download_loop)
+        t.daemon = True
+        bot.serve_forever(connect_callback = lambda: t.start())

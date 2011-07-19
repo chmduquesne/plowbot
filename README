@@ -1,2 +1,8 @@
 Plowbot is a minimalist jabber bot for plowshare. Once launched, it just
-waits for links supported by plowshare and downloads them.
+waits for links to pass to plowshare and downloads them.
+
+== Configuration ==
+
+The first time you launch it, it will ask for credentials to be configured
+with. Make sure the account you created for your bot has accepted an
+account to be controlled from in his "friends".
