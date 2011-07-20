@@ -19,6 +19,7 @@ import time
 import subprocess
 import json
 import readline
+import logging
 
 class PlowBot(JabberBot):
 
@@ -31,6 +32,12 @@ class PlowBot(JabberBot):
                 max_parallel_downloads)
         self.download_directory = os.path.expanduser(download_directory)
         assert os.path.exists(self.download_directory), "Download directory does not exist"
+        # logging stuff - newer versions of jabberbot
+        if not callable(self.log):
+            chandler = logging.StreamHandler()
+            formatter = logging.Formatter("%(asctime) - %(name)s - %(levelname)s - %(message)s")
+            self.log.addHandler(chandler)
+            self.log.setLevel(logging.INFO)
 
     # We do not want a command for downloading urls: we prefer every
     # message to be treated as a set of urls we'll try to download. Thus,
