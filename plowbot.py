@@ -12,7 +12,7 @@
 
 from __future__ import with_statement
 from jabberbot import JabberBot
-from xdg.BaseDirectory import save_config_path
+from xdg.BaseDirectory import save_config_path, save_data_path
 import os.path
 import threading
 import time
@@ -34,9 +34,10 @@ class PlowBot(JabberBot):
         assert os.path.exists(self.download_directory), "Download directory does not exist"
         # logging stuff - newer versions of jabberbot
         if not callable(self.log):
-            chandler = logging.StreamHandler()
+            logfile = os.path.join(save_data_path("plowbot"), "plowbot.log")
+            handler = logging.FileHandler(logfile)
             formatter = logging.Formatter("%(asctime) - %(name)s - %(levelname)s - %(message)s")
-            self.log.addHandler(chandler)
+            self.log.addHandler(handler)
             self.log.setLevel(logging.INFO)
 
     # We do not want a command for downloading urls: we prefer every
