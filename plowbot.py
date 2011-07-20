@@ -20,6 +20,7 @@ import subprocess
 import json
 import readline
 import logging
+import logging.handlers
 
 class PlowBot(JabberBot):
 
@@ -35,7 +36,7 @@ class PlowBot(JabberBot):
         # logging stuff - newer versions of jabberbot
         if not callable(self.log):
             logfile = os.path.join(save_data_path("plowbot"), "plowbot.log")
-            handler = logging.FileHandler(logfile)
+            handler = logging.handlers.RotatingFileHandler(logfile, maxBytes=100000)
             formatter = logging.Formatter("%(asctime) - %(name)s - %(levelname)s - %(message)s")
             self.log.addHandler(handler)
             self.log.setLevel(logging.INFO)
