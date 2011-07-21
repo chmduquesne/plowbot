@@ -3,7 +3,7 @@ waits for links and downloads them using plowshare.
 
 == Dependencies ==
 
-python-jabberbot, pyxdg
+python-jabberbot, pyxdg (and plowshare, obviously).
 
 == Configuration ==
 
