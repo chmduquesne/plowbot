@@ -74,6 +74,7 @@ class PlowBot(JabberBot):
             else:
                 reply = stdout.strip() + " successfully downloaded."
             self.send_simple_reply(msg, reply)
+            self.download_queue.task_done()
 
 def make_new_config(config_path):
     import getpass
