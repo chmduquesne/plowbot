@@ -21,14 +21,14 @@ import json
 import readline
 import logging
 import logging.handlers
+import Queue
 
 class PlowBot(JabberBot):
 
     def __init__(self, user, password, max_parallel_downloads=3,
             download_directory = "~/downloads", res = None):
         super(PlowBot, self).__init__(user, password, res)
-        self.download_queue = []
-        self.queue_sema = threading.Semaphore(0) # == len(download_queue)
+        self.download_queue = Queue.Queue()
         self.parallel_downloads_sema = threading.BoundedSemaphore(
                 max_parallel_downloads)
         self.download_directory = os.path.expanduser(download_directory)
@@ -47,15 +47,13 @@ class PlowBot(JabberBot):
     def unknown_command(self, msg, cmd, arg):
         """Splits the input and adds it to the download queue"""
         for url in (' '.join([cmd, arg])).split():
-            self.download_queue.append((msg, url))
-            self.queue_sema.release()
+            self.download_queue.put((msg, url))
         return "Launching download(s)."
 
     def download_loop(self):
         """Loops on downloading files of the queue."""
         while True:
-            self.queue_sema.acquire() # wait until the queue is not empty
-            msg, url = self. download_queue.pop()
+            msg, url = self.download_queue.get()
             t = threading.Thread(target = self.do_download, args = (msg,
                 url))
             t.daemon = True
