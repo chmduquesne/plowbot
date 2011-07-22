@@ -1,0 +1,13 @@
+Stuff to improve:
+
+Download queue management:
+check download links before queuing them: this way one should get a way to
+manage the download queue and we would improve error messages.
+
+Add a captcha queue:
+Upload captchas somewhere and send mail/links to the user.
+
+Commands to add:
+list - list the downloads in the download queue
+kill <id> - cancel/kill a queued/running download
+captcha <id> <captcha_text> - fill a given captcha
