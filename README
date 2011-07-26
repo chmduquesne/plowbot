@@ -3,10 +3,14 @@ waits for links and downloads them using plowshare.
 
 == Dependencies ==
 
-python-jabberbot, pyxdg (and plowshare, obviously).
+python-jabberbot, pyxdg (and plowshare, obviously). The code is written for python2 but python3 should be fine as soon as all the dependencies will support it.
 
 == Configuration ==
 
 The first time you launch it, it will ask for credentials to be configured
 with. Make sure the account you created for your bot has accepted an
 account to be controlled from in his "friends".
+
+== known bugs ==
+
+plowshare does not break recaptcha, and asks the user to break them. This is not supported by plowbot (for now). Don't use these sites (see https://code.google.com/p/plowshare/wiki/Readme).
