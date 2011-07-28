@@ -23,7 +23,7 @@ are welcome.
 
 == Starting the bot at boot ==
 
-If you want to start the bot at boot with an init script, you cant have a
+If you want to start the bot at boot with an init script, you can have a
 look at the archlinux package [1], which features such a script.
 
 [1] https://bitbucket.org/chmduquesne/archlinux-packages
