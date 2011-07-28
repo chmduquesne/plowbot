@@ -3,7 +3,9 @@ waits for links and downloads them using plowshare.
 
 == Dependencies ==
 
-python-jabberbot, pyxdg (and plowshare, obviously). The code is written for python2 but python3 should be fine as soon as all the dependencies will support it.
+python-jabberbot, pyxdg (and plowshare, obviously). The code is written
+for python2 but python3 should be fine as soon as all the dependencies
+will support it.
 
 == Configuration ==
 
@@ -11,6 +13,22 @@ The first time you launch it, it will ask for credentials to be configured
 with. Make sure the account you created for your bot has accepted an
 account to be controlled from in his "friends".
 
-== known bugs ==
+== Known bugs ==
 
-plowshare does not break recaptcha, and asks the user to break them. This is not supported by plowbot (for now). Don't use these sites (see https://code.google.com/p/plowshare/wiki/Readme).
+plowshare does not break recaptcha, and asks the user to break them. This
+is not supported by plowbot (for now). Don't use these sites (see
+https://code.google.com/p/plowshare/wiki/Readme), it will make the bot
+freeze. No fix is planned for that, but if you want to submit a patch, you
+are welcome.
+
+== Starting the bot at boot ==
+
+If you want to start the bot at boot with an init script, you cant have a
+look at the archlinux package [1], which features such a script.
+
+[1] https://bitbucket.org/chmduquesne/archlinux-packages
+
+== Submitting a patch ==
+
+The bot fits my (limited) use as it is, but I'd be glad to take any patch.
+Just send me pull requests.
